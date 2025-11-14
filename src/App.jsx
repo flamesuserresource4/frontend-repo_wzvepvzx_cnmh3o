@@ -1,28 +1,45 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Home from './pages/Home'
+import CaseStudy from './pages/CaseStudy'
 
-function App() {
-  const [count, setCount] = useState(0)
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [pathname])
+  return null
+}
 
+function PageTransitionWrapper({ children }) {
+  const location = useLocation()
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
-    </div>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <PageTransitionWrapper>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/case/:slug" element={<CaseStudy />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+      </PageTransitionWrapper>
+    </BrowserRouter>
+  )
+}
